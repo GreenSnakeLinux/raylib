@@ -4,10 +4,12 @@
 *
 *   Example originally created with raylib 5.0, last time updated with raylib 5.0
 *
+*   Example contributed by GreenSnake (@GreenSnakeLinux) and reviewed by Ramon Santamaria (@raysan5)
+*
 *   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
 *   BSD-like license that allows static linking with closed source software
 *
-*   Copyright (c) 2014-2024 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2024 GreenSnake (@GreenSnakeLinux)
 *
 ********************************************************************************************/
 
@@ -34,18 +36,8 @@ typedef struct {
 // Initialize the arc rectangles
 Arc upArc, downArc, leftArc, rightArc;
 
-const float directionSectionAngle = 90.0f;
-const float sectionAngleHalf = 90.0f / 2;
-const float downLowerLimit = 90 - sectionAngleHalf;
-const float downUpperLimit = 90 + sectionAngleHalf;
-const float upLowerLimit = 270 - sectionAngleHalf;
-const float upUpperLimit = 270 + sectionAngleHalf;
-const float leftLowerLimit = 180 - sectionAngleHalf;
-const float leftUpperLimit = 180 + sectionAngleHalf;
-const float rightLowerLimit = 360 - sectionAngleHalf;
-const float rightUpperLimit = sectionAngleHalf;
-const Color arcColor = (Color){ 255, 255, 255, 128};
-Color dpadColor, dpadColorPushed;
+float directionSectionAngle, sectionAngleHalf, downLowerLimit, downUpperLimit, upLowerLimit, upUpperLimit, leftLowerLimit, leftUpperLimit, rightLowerLimit, rightUpperLimit;
+Color arcColor, dpadColor, dpadColorPushed;
 Rectangle arcsRect;
 Vector2 point;
 int currentDirection;
@@ -54,12 +46,24 @@ bool showVirtualPosition;
 /**
  * Initialize DPad
  * @param location of the DPad : KEY_RIGHT or KEY_LEFT
+ * @param color Color of the dpad
  * @param size of the DPad (300 if set to 0)
- * @color Color of the dpad
  */
-void loadDpad(int location, Color color, int size) {
+void LoadDpad(int location, Color color, int size) {
     showVirtualPosition = true; // To show the limits where the user can touch the button (Can be deactivated)
     int dPadSize = size == 0 ? 300 : size;
+
+    directionSectionAngle = 90.0f;
+    sectionAngleHalf = 90.0f / 2;
+    downLowerLimit = 90.0f - sectionAngleHalf;
+    downUpperLimit = 90.0f + sectionAngleHalf;
+    upLowerLimit = 270.0f - sectionAngleHalf;
+    upUpperLimit = 270.0f + sectionAngleHalf;
+    leftLowerLimit = 180.0f - sectionAngleHalf;
+    leftUpperLimit = 180.0f + sectionAngleHalf;
+    rightLowerLimit = 360.0f - sectionAngleHalf;
+    rightUpperLimit = sectionAngleHalf;
+    arcColor = (Color){ 255, 255, 255, 128};
 
     if (location == KEY_LEFT) {
         arcsRect = (Rectangle) {50.0f, (float) GetScreenHeight() - ((float)size + 50.0f), (float) dPadSize,
@@ -99,7 +103,7 @@ void loadDpad(int location, Color color, int size) {
  * Update Dpad button when user press it
  * @param value KEY_UP, KEY_DOWN, KEY_RIGHT or KEY_LEFT
  */
-void updateDpad(int value) {
+void UpdateDpad(int value) {
     currentDirection = value;
 }
 
@@ -127,7 +131,7 @@ void DrawArc(Rectangle rect, float startAngle, float endAngle, bool fill, Color 
 /**
  * Draw Dpad
  */
-void drawDpad(void) {
+void DrawDpad(void) {
     if (showVirtualPosition) {
         DrawArc(arcsRect, upLowerLimit, upLowerLimit + directionSectionAngle,
                 currentDirection == KEY_UP, arcColor);
@@ -169,7 +173,7 @@ void drawDpad(void) {
  * @param y User x input from GetTouchY()
  * @return KEY_UP, KEY_DOWN, KEY_RIGHT or KEY_LEFT
  */
-int onDPadTouchEvent(int x, int y) {
+int OnDPadTouchEvent(int x, int y) {
     point.x = (float) x; point.y = (float) y;
     if (CheckCollisionPointCircle(point, upArc.center, upArc.radius)) {
         // User touched up arc
@@ -187,8 +191,6 @@ int onDPadTouchEvent(int x, int y) {
     return -1;
 }
 
-
-
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -202,7 +204,7 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - virtual Dpad");
 
-    loadDpad(KEY_LEFT, (Color){ 125, 127, 244, 255 }, 300);
+    LoadDpad(KEY_LEFT, (Color){ 125, 127, 244, 255 }, 300);
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -214,9 +216,9 @@ int main(void)
         //----------------------------------------------------------------------------------
         currentKey = -1;
         if (GetTouchPointCount() > 0) {
-            currentKey = onDPadTouchEvent(GetTouchX(), GetTouchY());
+            currentKey = OnDPadTouchEvent(GetTouchX(), GetTouchY());
         }
-        updateDpad(currentKey);
+        UpdateDpad(currentKey);
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -225,7 +227,7 @@ int main(void)
 
         ClearBackground(RAYWHITE);
 
-        drawDpad();
+        DrawDpad();
 
         EndDrawing();
         //----------------------------------------------------------------------------------
